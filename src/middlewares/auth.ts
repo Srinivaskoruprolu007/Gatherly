@@ -39,7 +39,7 @@ export const authMiddleware = createMiddleware({ type: 'request' }).server(
 
     // Protect dashboard routes and all other API routes.
     if (
-      (pathname.startsWith('/dashboard') || pathname.startsWith('/api')) &&
+      (pathname.startsWith('/dashboard') || pathname.startsWith('/api/ai')) &&
       !session
     ) {
       throw redirect({ to: '/auth/login' })
