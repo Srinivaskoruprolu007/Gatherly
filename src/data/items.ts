@@ -33,8 +33,8 @@ export const scrapeUrlFn = createServerFn({ method: 'POST' })
           'markdown',
           {
             type: 'json',
-            // prompt: 'Please extract the following fields: author, publishedAt',
-            schema: extractSchema,
+            prompt: 'Please extract the following fields: author, publishedAt',
+            // schema: extractSchema,
           },
         ],
         onlyMainContent: true,
@@ -125,7 +125,15 @@ export const bulkUrlScapFn = createServerFn({ method: 'POST' })
 
       try {
         const result = await fireCrawl.scrape(url, {
-          formats: ['markdown', { type: 'json', schema: extractSchema }],
+          formats: [
+            'markdown',
+            {
+              type: 'json',
+              prompt:
+                'Please extract the following fields: author, publishedAt',
+              // schema: extractSchema
+            },
+          ],
           onlyMainContent: true,
         })
 
