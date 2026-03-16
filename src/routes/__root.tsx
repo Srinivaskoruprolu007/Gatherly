@@ -6,6 +6,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { Analytics } from '@vercel/analytics/react'
 
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
@@ -89,6 +90,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           {children}
           <Toaster position="top-left" closeButton />
         </ThemeProvider>
+        <Analytics />
         {import.meta.env.DEV ? (
           <TanStackDevtools
             config={{
