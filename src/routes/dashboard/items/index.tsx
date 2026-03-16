@@ -21,6 +21,7 @@ const ItemsList = lazy(() => import('#/components/web/items-list'))
 export const Route = createFileRoute('/dashboard/items/')({
   component: Index,
   loader: () => ({ itemsPromise: fetchItemsfn() }),
+  loaderDeps: () => ({}),
   validateSearch: zodValidator(itemSearchSchema),
   staticData: { breadcrumb: 'Items' },
   head: () => ({
