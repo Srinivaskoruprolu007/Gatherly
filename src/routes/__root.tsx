@@ -31,34 +31,34 @@ const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getIte
 export const Route = createRootRoute({
   head: () => ({
     meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: SITE_TITLE },
+      { name: 'description', content: SITE_DESCRIPTION },
+
+      // Open Graph
+      { property: 'og:title', content: SITE_TITLE },
+      { property: 'og:description', content: SITE_DESCRIPTION },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://yourdomain.com' },
       {
-        charSet: 'utf-8',
+        property: 'og:image',
+        content:
+          'https://res.cloudinary.com/djuvtohxk/image/upload/v1773383880/Gatherly_favicon_mb93ts.webp',
       },
+
+      // Twitter/X
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: SITE_TITLE },
+      { name: 'twitter:description', content: SITE_DESCRIPTION },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: SITE_TITLE,
-      },
-      {
-        name: 'description',
-        content: SITE_DESCRIPTION,
-      },
-      {
-        property: 'og:title',
-        content: SITE_TITLE,
-      },
-      {
-        property: 'og:description',
-        content: SITE_DESCRIPTION,
+        name: 'twitter:image',
+        content:
+          'https://res.cloudinary.com/djuvtohxk/image/upload/v1773383880/Gatherly_favicon_mb93ts.webp',
       },
     ],
     links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
+      { rel: 'stylesheet', href: appCss },
       {
         rel: 'icon',
         href: 'https://res.cloudinary.com/djuvtohxk/image/upload/v1773383880/Gatherly_favicon_mb93ts.webp',
