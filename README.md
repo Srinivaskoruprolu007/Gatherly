@@ -1,204 +1,123 @@
-Welcome to your new TanStack Start app! 
+# Gatherly
 
-# Getting Started
+> A modern full-stack web application built with TanStack Start and React.
 
-To run this application:
+[![Live Demo](https://img.shields.io/badge/Live-gatherly--bice.vercel.app-blue?style=flat-square)](https://gatherly-bice.vercel.app)
+[![TypeScript](https://img.shields.io/badge/TypeScript-99%25-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
+
+---
+
+## Tech Stack
+
+| Layer         | Technology                                                  |
+| ------------- | ----------------------------------------------------------- |
+| Framework     | [TanStack Start](https://tanstack.com/start)                |
+| Routing       | [TanStack Router](https://tanstack.com/router) (file-based) |
+| Forms         | [TanStack Form](https://tanstack.com/form)                  |
+| Auth          | [Better Auth](https://better-auth.com)                      |
+| UI Components | [shadcn/ui](https://ui.shadcn.com)                          |
+| Styling       | [Tailwind CSS v4](https://tailwindcss.com)                  |
+| Database ORM  | [Prisma](https://prisma.io)                                 |
+| Notifications | [Sonner](https://sonner.emilkowal.ski)                      |
+| Analytics     | [Vercel Analytics](https://vercel.com/analytics)            |
+| Language      | TypeScript                                                  |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm
+
+### Installation
 
 ```bash
+git clone https://github.com/Srinivaskoruprolu007/Gatherly.git
+cd Gatherly
 pnpm install
+```
+
+### Environment Variables
+
+Create a `.env` file in the root and fill in your values:
+
+```env
+DATABASE_URL=your_postgresql_connection_string
+BETTER_AUTH_SECRET=your_auth_secret
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+### Development
+
+```bash
 pnpm dev
 ```
 
-# Building For Production
-
-To build this application for production:
+### Production Build
 
 ```bash
 pnpm build
+pnpm start
 ```
 
-## Testing
+---
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+## Scripts
 
-```bash
-pnpm test
+| Command       | Description                                 |
+| ------------- | ------------------------------------------- |
+| `pnpm dev`    | Start development server                    |
+| `pnpm build`  | Build for production                        |
+| `pnpm start`  | Start production server                     |
+| `pnpm test`   | Run tests with [Vitest](https://vitest.dev) |
+| `pnpm lint`   | Lint with ESLint                            |
+| `pnpm format` | Format with Prettier                        |
+| `pnpm check`  | Run lint + format check together            |
+
+---
+
+## Project Structure
+
+```
+src/
+├── routes/           # File-based routes (TanStack Router)
+│   ├── __root.tsx    # Root layout with head, theme, toaster
+│   └── ...
+├── components/       # Shared UI components (shadcn/ui)
+├── context/          # React context providers (ThemeContext, etc.)
+├── lib/              # Utilities and constants
+└── styles.css        # Global styles (Tailwind)
+
+prisma/
+└── schema.prisma     # Database schema
 ```
 
-## Styling
+---
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+## Features
 
-### Removing Tailwind CSS
+- **SSR** — Server-side rendered with TanStack Start
+- **File-based Routing** — Automatic route generation from `src/routes/`
+- **Auth** — Session-based authentication via Better Auth
+- **Dark / Light Theme** — Runtime theme switching with no flash on load
+- **Type-safe** — End-to-end TypeScript with strict configuration
+- **Analytics** — Page view tracking via Vercel Analytics
 
-If you prefer not to use Tailwind CSS:
+---
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `pnpm add @tailwindcss/vite tailwindcss --dev`
+## Deployment
 
-## Linting & Formatting
+This app is deployed on **Vercel**. Every push to `main` triggers a production deployment automatically.
 
+Live URL: [https://gatherly-bice.vercel.app](https://gatherly-bice.vercel.app)
 
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+---
 
-```bash
-pnpm lint
-pnpm format
-pnpm check
-```
+## License
 
+MIT License
 
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+Copyright (c) 2026 Srinivaskoruprolu007
