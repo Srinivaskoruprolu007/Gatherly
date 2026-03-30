@@ -2,13 +2,13 @@ import { prisma } from '#/db'
 import { fireCrawl } from '#/lib/fire-crawl'
 import { openrouter } from '#/lib/open-router'
 import { authFnMiddleware } from '#/middlewares/auth'
-import { itemSearchSchema } from '#/schemas/items'
 import {
   bulkImportSchema,
   extractSchema,
   importSchema,
   searchSchema,
 } from '#/schemas/import'
+import { itemSearchSchema } from '#/schemas/items'
 import type { SearchResultWeb } from '@mendable/firecrawl-js'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -16,7 +16,7 @@ import { generateObject } from 'ai'
 import z from 'zod'
 
 const MAX_AI_CONTENT_LENGTH = 50_000
-const ITEMS_PAGE_SIZE = 12
+const ITEMS_PAGE_SIZE = 8
 const FAILED_ITEM_RETENTION_MS = 60 * 60 * 1000
 
 const summaryAndTagsSchema = z.object({
@@ -33,11 +33,13 @@ function normalizeAiContent(content: string) {
 }
 
 function normalizeTags(tags: string[]) {
-  return [...new Set(
-    tags
-      .map((tag) => tag.trim().toLowerCase().replace(/\s+/g, ' '))
-      .filter(Boolean),
-  )].slice(0, 8)
+  return [
+    ...new Set(
+      tags
+        .map((tag) => tag.trim().toLowerCase().replace(/\s+/g, ' '))
+        .filter(Boolean),
+    ),
+  ].slice(0, 8)
 }
 
 function parseExtractedMetadata(value: unknown) {
