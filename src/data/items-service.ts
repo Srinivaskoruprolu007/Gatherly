@@ -1,8 +1,8 @@
-/*
 import { prisma } from '#/db'
 import { fireCrawl } from '#/lib/fire-crawl'
 import { openrouter } from '#/lib/open-router'
 import { authFnMiddleware } from '#/middlewares/auth'
+import { itemSearchSchema } from '#/schemas/items'
 import {
   bulkImportSchema,
   extractSchema,
@@ -16,6 +16,8 @@ import { generateObject } from 'ai'
 import z from 'zod'
 
 const MAX_AI_CONTENT_LENGTH = 50_000
+const ITEMS_PAGE_SIZE = 12
+const FAILED_ITEM_RETENTION_MS = 60 * 60 * 1000
 
 const summaryAndTagsSchema = z.object({
   summary: z.string().min(1),
@@ -122,10 +124,20 @@ async function findLatestItemByUrl(userId: string, url: string) {
       createdAt: 'desc',
     },
   })
-*/
+}
 
-export * from './items-service'
-/*
+async function purgeExpiredFailedItems(userId: string) {
+  const expirationThreshold = new Date(Date.now() - FAILED_ITEM_RETENTION_MS)
+
+  await prisma.savedItems.deleteMany({
+    where: {
+      userId,
+      status: 'FAILED',
+      updatedAt: {
+        lt: expirationThreshold,
+      },
+    },
+  })
 }
 
 async function prepareItemForImport(options: {
@@ -195,12 +207,13 @@ async function completeImportedItem(itemId: string, url: string) {
     },
   })
 }
+
 export const scrapeUrlFn = createServerFn({ method: 'POST' })
   .middleware([authFnMiddleware])
   .inputValidator(importSchema)
   .handler(async ({ data, context }) => {
-    const user = context?.session?.user
-    if (!user) throw new Error('Unauthorized')
+    const user = context.session.user
+    await purgeExpiredFailedItems(user.id)
 
     const existingItem = await findLatestItemByUrl(user.id, data.url)
 
@@ -261,6 +274,7 @@ export const mapUrlFn = createServerFn({ method: 'POST' })
       throw new Error('Unable to map URLs for this website')
     }
   })
+
 export type BulkScrapeProgress = {
   completed: number
   total: number
@@ -276,8 +290,8 @@ export const bulkUrlScapFn = createServerFn({ method: 'POST' })
     }),
   )
   .handler(async function* ({ data, context }) {
-    const user = context?.session?.user
-    if (!user) throw new Error('Unauthorized')
+    const user = context.session.user
+    await purgeExpiredFailedItems(user.id)
 
     const total = data.urls.length
     let completed = 0
@@ -327,28 +341,96 @@ export const bulkUrlScapFn = createServerFn({ method: 'POST' })
       }
     }
   })
+
 export const fetchItemsfn = createServerFn({ method: 'GET' })
   .middleware([authFnMiddleware])
-  .handler(async ({ context }) => {
-    const user = context?.session?.user
-    if (!user) throw new Error('Unauthorized')
+  .inputValidator(itemSearchSchema)
+  .handler(async ({ data, context }) => {
+    const user = context.session.user
+    await purgeExpiredFailedItems(user.id)
 
-    return prisma.savedItems.findMany({
-      where: {
-        userId: user.id,
-      },
+    const normalizedQuery = data.q.trim().toLowerCase()
+    const where = {
+      userId: user.id,
+      ...(data.status !== 'all' ? { status: data.status } : {}),
+      ...(normalizedQuery
+        ? {
+            OR: [
+              {
+                title: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                summary: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                author: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                url: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                tags: {
+                  has: normalizedQuery,
+                },
+              },
+            ],
+          }
+        : {}),
+    }
+
+    const [libraryTotalItems, totalItems] = await Promise.all([
+      prisma.savedItems.count({
+        where: {
+          userId: user.id,
+        },
+      }),
+      prisma.savedItems.count({ where }),
+    ])
+
+    const totalPages =
+      totalItems === 0 ? 1 : Math.ceil(totalItems / ITEMS_PAGE_SIZE)
+    const currentPage = Math.min(data.page, totalPages)
+    const items = await prisma.savedItems.findMany({
+      where,
       orderBy: {
         createdAt: 'desc',
       },
+      skip: (currentPage - 1) * ITEMS_PAGE_SIZE,
+      take: ITEMS_PAGE_SIZE,
     })
+
+    return {
+      items,
+      libraryTotalItems,
+      pagination: {
+        currentPage,
+        pageSize: ITEMS_PAGE_SIZE,
+        totalItems,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPreviousPage: currentPage > 1,
+      },
+    }
   })
 
 export const fetchItemByIdfn = createServerFn({ method: 'GET' })
   .middleware([authFnMiddleware])
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data, context }) => {
-    const user = context?.session?.user
-    if (!user) throw new Error('Unauthorized')
+    const user = context.session.user
+    await purgeExpiredFailedItems(user.id)
 
     const item = await prisma.savedItems.findFirst({
       where: {
@@ -372,8 +454,7 @@ export const saveSummaryAndGenerateTagsFn = createServerFn({ method: 'POST' })
     }),
   )
   .handler(async ({ context, data }) => {
-    const user = context?.session?.user
-    if (!user) throw new Error('Unauthorized')
+    const user = context.session.user
 
     const existingItem = await prisma.savedItems.findFirst({
       where: {
@@ -384,49 +465,17 @@ export const saveSummaryAndGenerateTagsFn = createServerFn({ method: 'POST' })
 
     if (!existingItem) throw notFound()
 
-    // Generate summary
-    const { text: summary } = await generateText({
-      model,
-      system: `You are a helpful assistant that creates concise summaries of web page content.
-      - Write at least 2-3 paragraphs.
-      - Write in clear, professional prose that is easy to understand.
-      - Be factual — do not add information not present in the content.
-      - Keep the summary under 300 words unless the content is exceptionally long.
-      - Do not include phrases like "This article discusses..." — get straight to the point.`,
-      prompt: data.content,
-    })
+    const tags =
+      existingItem.tags.length > 0
+        ? existingItem.tags
+        : await generateTags(existingItem.title || null, data.content)
 
-    // Generate tags based on the same content
-    const { text: tagsRaw } = await generateText({
-      model,
-      system: `You are a helpful assistant that extracts concise topic tags from web page content.
-      - Return only a JSON array of lowercase tag strings, e.g. ["react", "typescript", "performance", "nextjs", "technology"].
-      - Produce between 3 and 8 tags.
-      - Tags should be short (1-3 words), specific, and useful for filtering/search.
-      - Return nothing else — no explanation, no markdown fences.`,
-      prompt: data.content,
-    })
-
-    let tags: string[] = []
-    try {
-      const parsedTags = JSON.parse(tagsRaw)
-      if (Array.isArray(parsedTags)) {
-        tags = parsedTags.filter(
-          (tag): tag is string => typeof tag === 'string' && tag.length > 0,
-        )
-      }
-    } catch {
-      // fall back to an empty tag list rather than crashing
-      console.error('Failed to parse generated tags:', tagsRaw)
-    }
-
-    await prisma.savedItems.updateMany({
+    await prisma.savedItems.update({
       where: {
         id: data.id,
-        userId: user.id,
       },
       data: {
-        summary: data.summary || summary,
+        summary: data.summary.trim(),
         tags,
       },
     })
@@ -445,13 +494,12 @@ export const searchWebFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const result = await fireCrawl.search(data.query, {
       limit: 10,
-      location: 'India',
       scrapeOptions: { formats: ['markdown'] },
     })
+
     return result.web?.map((item) => ({
       url: (item as SearchResultWeb).url,
       title: (item as SearchResultWeb).title,
       description: (item as SearchResultWeb).description,
     })) as SearchResultWeb[]
   })
-*/

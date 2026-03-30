@@ -1,4 +1,4 @@
-import type { fetchItemByIdfn } from '#/data/items'
+import type { fetchItemByIdfn } from '#/data/items-service'
 import { Loader, Sparkle } from 'lucide-react'
 import { MessageResponse } from './ai-elements/message'
 import { Button } from './ui/button'
@@ -24,20 +24,21 @@ const AiSummaryCard = ({
             <h2 className="text-sm font-semibold uppercase tracking-wide text-primary mb-3">
               AI Summary
             </h2>
-            {completion ||
-              (data?.summary ? (
-                <MessageResponse parseIncompleteMarkdown={true}>
-                  {completion}
-                </MessageResponse>
-              ) : (
-                <p className="text-muted-foreground italic ">
-                  {data?.content
-                    ? 'No summary yet. Generate one with AI'
-                    : 'No Content available to summarize'}
-                </p>
-              ))}
+            {completion ? (
+              <MessageResponse parseIncompleteMarkdown>
+                {completion}
+              </MessageResponse>
+            ) : data.summary ? (
+              <MessageResponse>{data.summary}</MessageResponse>
+            ) : (
+              <p className="text-muted-foreground italic ">
+                {data.content
+                  ? 'No summary yet. Generate one with AI'
+                  : 'No content available to summarize'}
+              </p>
+            )}
           </div>
-          {data?.content && !data?.summary && (
+          {data.content && !data.summary && (
             <Button
               size={'sm'}
               onClick={onGenerateSummary}

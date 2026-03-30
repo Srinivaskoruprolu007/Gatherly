@@ -18,12 +18,8 @@ import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Progress } from '#/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
-import {
-  bulkUrlScapFn,
-  mapUrlFn,
-  scrapeUrlFn,
-  type BulkScrapeProgress,
-} from '#/data/items'
+import { bulkUrlScapFn, mapUrlFn, scrapeUrlFn } from '#/data/items-service'
+import type { BulkScrapeProgress } from '#/data/items-service'
 import { bulkImportSchema, importSchema } from '#/schemas/import'
 import type { SearchResultWeb } from '@mendable/firecrawl-js'
 import { useForm } from '@tanstack/react-form'
@@ -44,12 +40,17 @@ function RouteComponent() {
   const [progress, setProgress] = useState<BulkScrapeProgress | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isBulkPending, startBulkTransition] = useTransition()
+  const selectableLinkCount = discoveredLinks.filter((link) => link.url).length
 
   const handleSelectAll = () => {
-    if (selectedLinks.size === discoveredLinks.length) {
+    if (selectedLinks.size === selectableLinkCount) {
       setSelectedLinks(new Set())
     } else {
-      setSelectedLinks(new Set(discoveredLinks.map((l) => l.url ?? '')))
+      setSelectedLinks(
+        new Set(
+          discoveredLinks.flatMap((link) => (link.url ? [link.url] : [])),
+        ),
+      )
     }
   }
 
@@ -80,6 +81,7 @@ function RouteComponent() {
 
         let successCount = 0
         let failedCount = 0
+        let skippedCount = 0
 
         const stream = await bulkUrlScapFn({
           data: { urls: Array.from(selectedLinks) },
@@ -89,14 +91,20 @@ function RouteComponent() {
           setProgress(update)
           if (update.status === 'success') {
             successCount++
+          } else if (update.status === 'skipped') {
+            skippedCount++
           } else {
             failedCount++
           }
         }
 
-        if (failedCount === 0) {
+        if (failedCount === 0 && skippedCount === 0) {
           toast.success(
             `Successfully imported ${successCount} URL${successCount === 1 ? '' : 's'}`,
+          )
+        } else if (successCount === 0 && failedCount === 0) {
+          toast.info(
+            `${skippedCount} URL${skippedCount === 1 ? '' : 's'} already exist in your library`,
           )
         } else if (successCount === 0) {
           toast.error(
@@ -104,7 +112,7 @@ function RouteComponent() {
           )
         } else {
           toast.warning(
-            `Imported ${successCount} URL${successCount === 1 ? '' : 's'}, ${failedCount} failed`,
+            `Imported ${successCount}, skipped ${skippedCount}, failed ${failedCount}`,
           )
         }
 
@@ -127,8 +135,12 @@ function RouteComponent() {
     onSubmit: ({ value }) => {
       startTransition(async () => {
         try {
-          await scrapeUrlFn({ data: { url: value.url } })
-          toast.success('URL scraped successfully')
+          const result = await scrapeUrlFn({ data: { url: value.url } })
+          if (result.outcome === 'skipped') {
+            toast.info(result.message)
+          } else {
+            toast.success(result.message)
+          }
           form.reset()
         } catch {
           toast.error('Unable to scrape this URL')
@@ -148,10 +160,9 @@ function RouteComponent() {
     onSubmit: ({ value }) => {
       startBulkTransition(async () => {
         try {
-          const links =
-            (await mapUrlFn({
-              data: { url: value.url, search: value.search },
-            })) ?? []
+          const links = await mapUrlFn({
+            data: { url: value.url, search: value.search },
+          })
 
           setDiscoveredLinks(links)
           setSelectedLinks(new Set())
@@ -178,7 +189,7 @@ function RouteComponent() {
         <div className="text-center">
           <h1 className="text-3xl font-bold">Import Data</h1>
           <p className="pt-2 text-muted-foreground">
-            Import your data from a JSON file.
+            Save a single URL or map a site to import multiple pages at once.
           </p>
         </div>
 
@@ -367,9 +378,9 @@ function RouteComponent() {
                         onClick={handleSelectAll}
                         disabled={isBulkPending}
                       >
-                        {selectedLinks.size === discoveredLinks.length
+                        {selectedLinks.size === selectableLinkCount
                           ? 'Deselect All'
-                          : `Select All (${discoveredLinks.length})`}
+                          : `Select All (${selectableLinkCount})`}
                       </Button>
                     </div>
 
@@ -381,11 +392,13 @@ function RouteComponent() {
                           className="flex cursor-pointer items-start gap-3 border-b p-4 last:border-0 hover:bg-muted/50 has-checked:bg-primary/5"
                         >
                           <Checkbox
-                            checked={selectedLinks.has(link.url ?? '')}
+                            checked={Boolean(link.url) && selectedLinks.has(link.url)}
                             className="mt-1"
-                            onCheckedChange={() =>
-                              handleToggleUrl(link.url ?? '')
-                            }
+                            onCheckedChange={() => {
+                              if (link.url) {
+                                handleToggleUrl(link.url)
+                              }
+                            }}
                             disabled={isBulkPending}
                           />
                           <div className="min-w-0 space-y-0.5">
@@ -412,7 +425,9 @@ function RouteComponent() {
                           <span className="max-w-[75%] truncate">
                             {progress.url ? (
                               <>
-                                Importing{' '}
+                                {progress.status === 'skipped'
+                                  ? 'Skipping'
+                                  : 'Importing'}{' '}
                                 <span className="font-medium text-foreground">
                                   {progress.url}
                                 </span>

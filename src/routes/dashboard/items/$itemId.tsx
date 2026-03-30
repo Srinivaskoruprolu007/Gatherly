@@ -8,7 +8,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '#/components/ui/collapsible'
-import { fetchItemByIdfn, saveSummaryAndGenerateTagsFn } from '#/data/items'
+import {
+  fetchItemByIdfn,
+  saveSummaryAndGenerateTagsFn,
+} from '#/data/items-service'
 import { cn } from '#/lib/utils'
 import { useCompletion } from '@ai-sdk/react'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
@@ -32,11 +35,11 @@ export const Route = createFileRoute('/dashboard/items/$itemId')({
   head: ({ loaderData }) => ({
     meta: [
       {
-        title: loaderData?.title ?? 'Item',
+        title: loaderData.title ?? 'Item',
       },
       {
         property: 'og:title',
-        content: loaderData?.title ?? 'Item',
+        content: loaderData.title ?? 'Item',
       },
     ],
   }),
@@ -51,9 +54,9 @@ function RouteComponent() {
   const { completion, isLoading, complete } = useCompletion({
     api: '/api/ai/summary',
     streamProtocol: 'text',
-    initialCompletion: data?.summary ?? undefined,
+    initialCompletion: data.summary ?? undefined,
     body: {
-      itemId: data?.id,
+      itemId: data.id,
     },
     onFinish: async (_prompt, completionText) => {
       setIsSaving(true)
@@ -61,9 +64,9 @@ function RouteComponent() {
       try {
         await saveSummaryAndGenerateTagsFn({
           data: {
-            id: data?.id ?? '',
+            id: data.id,
             summary: completionText,
-            content: data?.content ?? '',
+            content: data.content ?? '',
           },
         })
         toast.success('Summary and tags saved', { id: savingToast })
@@ -80,7 +83,7 @@ function RouteComponent() {
   })
 
   const handleGenerateSummary = () => {
-    if (!data?.content) {
+    if (!data.content) {
       toast.error('No content to summarize')
       return
     }
@@ -112,7 +115,7 @@ function RouteComponent() {
         </Link>
       </div>
 
-      {data?.ogImage && (
+      {data.ogImage && (
         <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
           <img
             className="size-full object-cover transition-transform duration-300 hover:scale-105"
@@ -123,18 +126,16 @@ function RouteComponent() {
       )}
 
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {data?.title ?? 'Untitled'}
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">{data.title ?? 'Untitled'}</h1>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-          {data?.author && (
+          {data.author && (
             <span className="inline-flex items-center gap-1.5">
               <User className="size-4" />
               {data.author}
             </span>
           )}
-          {data?.publishedAt && (
+          {data.publishedAt && (
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="size-4" />
               {new Date(data.publishedAt).toLocaleDateString('en-US')}
@@ -142,14 +143,11 @@ function RouteComponent() {
           )}
           <span className="inline-flex items-center gap-1.5">
             <Clock className="size-4" />
-            Saved{' '}
-            {new Date(data?.createdAt ?? Date.now()).toLocaleDateString(
-              'en-US',
-            )}
+            Saved {new Date(data.createdAt).toLocaleDateString('en-US')}
           </span>
         </div>
         <a
-          href={data?.url}
+          href={data.url}
           className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
           target="_blank"
           rel="noreferrer"
@@ -158,9 +156,9 @@ function RouteComponent() {
           <ExternalLink className="size-4" />
         </a>
 
-        {(data?.tags ?? []).length > 0 && (
+        {data.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {data?.tags.map((tag) => (
+            {data.tags.map((tag) => (
               <Badge key={tag}>{tag}</Badge>
             ))}
           </div>
@@ -173,7 +171,7 @@ function RouteComponent() {
           onGenerateSummary={handleGenerateSummary}
         />
 
-        {data?.content && (
+        {data.content && (
           <Collapsible open={contentOpen} onOpenChange={setContentOpen}>
             <CollapsibleTrigger asChild>
               <Button variant="outline" className="w-full justify-between">

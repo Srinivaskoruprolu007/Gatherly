@@ -1,3 +1,6 @@
+import { buttonVariants } from '#/components/ui/button'
+import { ThemeProvider } from '#/context/ThemeContext'
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from '#/lib/site'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import {
   HeadContent,
@@ -5,10 +8,11 @@ import {
   Scripts,
   createRootRoute,
 } from '@tanstack/react-router'
+import type { AnyRouteMatch } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { Analytics } from '@vercel/analytics/react'
-
-import type { AnyRouteMatch } from '@tanstack/react-router'
+import { Toaster } from 'sonner'
+import appCss from '../styles.css?url'
 
 export type BreadcrumbValue =
   | string
@@ -20,12 +24,6 @@ declare module '@tanstack/react-router' {
     breadcrumb?: BreadcrumbValue
   }
 }
-
-import { buttonVariants } from '#/components/ui/button'
-import { ThemeProvider } from '#/context/ThemeContext'
-import { SITE_DESCRIPTION, SITE_TITLE } from '#/lib/site'
-import { Toaster } from 'sonner'
-import appCss from '../styles.css?url'
 
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('app-theme');var theme=(stored==='light'||stored==='dark')?stored:'light';var root=document.documentElement;root.classList.remove('dark');if(theme==='dark'){root.classList.add('dark')}root.style.colorScheme=theme==='dark'?'dark':'light';}catch(e){}})();`
 
@@ -41,7 +39,7 @@ export const Route = createRootRoute({
       { property: 'og:title', content: SITE_TITLE },
       { property: 'og:description', content: SITE_DESCRIPTION },
       { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: 'https://yourdomain.com' },
+      { property: 'og:url', content: SITE_URL },
       {
         property: 'og:image',
         content:
@@ -59,6 +57,7 @@ export const Route = createRootRoute({
       },
     ],
     links: [
+      { rel: 'canonical', href: SITE_URL },
       { rel: 'stylesheet', href: appCss },
       {
         rel: 'icon',

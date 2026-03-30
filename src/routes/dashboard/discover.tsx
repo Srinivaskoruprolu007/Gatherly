@@ -16,11 +16,8 @@ import {
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Progress } from '#/components/ui/progress'
-import {
-  bulkUrlScapFn,
-  searchWebFn,
-  type BulkScrapeProgress,
-} from '#/data/items'
+import { bulkUrlScapFn, searchWebFn } from '#/data/items-service'
+import type { BulkScrapeProgress } from '#/data/items-service'
 import { searchSchema } from '#/schemas/import'
 import type { SearchResultWeb } from '@mendable/firecrawl-js'
 import { useForm } from '@tanstack/react-form'
@@ -68,6 +65,7 @@ function RouteComponent() {
 
         let successCount = 0
         let failedCount = 0
+        let skippedCount = 0
 
         const stream = await bulkUrlScapFn({
           data: { urls: Array.from(selectedLinks) },
@@ -77,14 +75,20 @@ function RouteComponent() {
           setProgress(update)
           if (update.status === 'success') {
             successCount++
+          } else if (update.status === 'skipped') {
+            skippedCount++
           } else {
             failedCount++
           }
         }
 
-        if (failedCount === 0) {
+        if (failedCount === 0 && skippedCount === 0) {
           toast.success(
             `Successfully imported ${successCount} URL${successCount === 1 ? '' : 's'}`,
+          )
+        } else if (successCount === 0 && failedCount === 0) {
+          toast.info(
+            `${skippedCount} URL${skippedCount === 1 ? '' : 's'} already exist in your library`,
           )
         } else if (successCount === 0) {
           toast.error(
@@ -92,7 +96,7 @@ function RouteComponent() {
           )
         } else {
           toast.warning(
-            `Imported ${successCount} URL${successCount === 1 ? '' : 's'}, ${failedCount} failed`,
+            `Imported ${successCount}, skipped ${skippedCount}, failed ${failedCount}`,
           )
         }
 
@@ -239,7 +243,7 @@ function RouteComponent() {
                   <span className="max-w-[75%] truncate">
                     {progress.url ? (
                       <>
-                        Importing{' '}
+                        {progress.status === 'skipped' ? 'Skipping' : 'Importing'}{' '}
                         <span className="font-medium text-foreground">
                           {progress.url}
                         </span>
