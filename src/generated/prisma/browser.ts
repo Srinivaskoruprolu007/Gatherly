@@ -43,6 +43,16 @@ export type Verification = Prisma.VerificationModel
  */
 export type SavedItems = Prisma.SavedItemsModel
 /**
+ * Model Collection
+ * 
+ */
+export type Collection = Prisma.CollectionModel
+/**
+ * Model CollectionItem
+ * 
+ */
+export type CollectionItem = Prisma.CollectionItemModel
+/**
  * Model landing_page_content
  * 
  */

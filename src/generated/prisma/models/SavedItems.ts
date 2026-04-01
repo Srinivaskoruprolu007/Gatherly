@@ -243,6 +243,7 @@ export type SavedItemsWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"SavedItems"> | Date | string
   userId?: Prisma.StringFilter<"SavedItems"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  collectionItems?: Prisma.CollectionItemListRelationFilter
 }
 
 export type SavedItemsOrderByWithRelationInput = {
@@ -260,6 +261,7 @@ export type SavedItemsOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  collectionItems?: Prisma.CollectionItemOrderByRelationAggregateInput
 }
 
 export type SavedItemsWhereUniqueInput = Prisma.AtLeast<{
@@ -280,6 +282,7 @@ export type SavedItemsWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"SavedItems"> | Date | string
   userId?: Prisma.StringFilter<"SavedItems"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  collectionItems?: Prisma.CollectionItemListRelationFilter
 }, "id">
 
 export type SavedItemsOrderByWithAggregationInput = {
@@ -334,6 +337,7 @@ export type SavedItemsCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSavedItemsInput
+  collectionItems?: Prisma.CollectionItemCreateNestedManyWithoutItemInput
 }
 
 export type SavedItemsUncheckedCreateInput = {
@@ -350,6 +354,7 @@ export type SavedItemsUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: string
+  collectionItems?: Prisma.CollectionItemUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type SavedItemsUpdateInput = {
@@ -366,6 +371,7 @@ export type SavedItemsUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSavedItemsNestedInput
+  collectionItems?: Prisma.CollectionItemUpdateManyWithoutItemNestedInput
 }
 
 export type SavedItemsUncheckedUpdateInput = {
@@ -382,6 +388,7 @@ export type SavedItemsUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  collectionItems?: Prisma.CollectionItemUncheckedUpdateManyWithoutItemNestedInput
 }
 
 export type SavedItemsCreateManyInput = {
@@ -495,6 +502,11 @@ export type SavedItemsMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
 }
 
+export type SavedItemsScalarRelationFilter = {
+  is?: Prisma.SavedItemsWhereInput
+  isNot?: Prisma.SavedItemsWhereInput
+}
+
 export type SavedItemsCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.SavedItemsCreateWithoutUserInput, Prisma.SavedItemsUncheckedCreateWithoutUserInput> | Prisma.SavedItemsCreateWithoutUserInput[] | Prisma.SavedItemsUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.SavedItemsCreateOrConnectWithoutUserInput | Prisma.SavedItemsCreateOrConnectWithoutUserInput[]
@@ -550,6 +562,20 @@ export type EnumItemStatusFieldUpdateOperationsInput = {
   set?: $Enums.ItemStatus
 }
 
+export type SavedItemsCreateNestedOneWithoutCollectionItemsInput = {
+  create?: Prisma.XOR<Prisma.SavedItemsCreateWithoutCollectionItemsInput, Prisma.SavedItemsUncheckedCreateWithoutCollectionItemsInput>
+  connectOrCreate?: Prisma.SavedItemsCreateOrConnectWithoutCollectionItemsInput
+  connect?: Prisma.SavedItemsWhereUniqueInput
+}
+
+export type SavedItemsUpdateOneRequiredWithoutCollectionItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.SavedItemsCreateWithoutCollectionItemsInput, Prisma.SavedItemsUncheckedCreateWithoutCollectionItemsInput>
+  connectOrCreate?: Prisma.SavedItemsCreateOrConnectWithoutCollectionItemsInput
+  upsert?: Prisma.SavedItemsUpsertWithoutCollectionItemsInput
+  connect?: Prisma.SavedItemsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SavedItemsUpdateToOneWithWhereWithoutCollectionItemsInput, Prisma.SavedItemsUpdateWithoutCollectionItemsInput>, Prisma.SavedItemsUncheckedUpdateWithoutCollectionItemsInput>
+}
+
 export type SavedItemsCreateWithoutUserInput = {
   id?: string
   url: string
@@ -563,6 +589,7 @@ export type SavedItemsCreateWithoutUserInput = {
   ogImage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  collectionItems?: Prisma.CollectionItemCreateNestedManyWithoutItemInput
 }
 
 export type SavedItemsUncheckedCreateWithoutUserInput = {
@@ -578,6 +605,7 @@ export type SavedItemsUncheckedCreateWithoutUserInput = {
   ogImage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  collectionItems?: Prisma.CollectionItemUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type SavedItemsCreateOrConnectWithoutUserInput = {
@@ -625,6 +653,86 @@ export type SavedItemsScalarWhereInput = {
   userId?: Prisma.StringFilter<"SavedItems"> | string
 }
 
+export type SavedItemsCreateWithoutCollectionItemsInput = {
+  id?: string
+  url: string
+  title?: string | null
+  content?: string | null
+  summary?: string | null
+  tags?: Prisma.SavedItemsCreatetagsInput | string[]
+  author?: string | null
+  status?: $Enums.ItemStatus
+  publishedAt?: Date | string | null
+  ogImage?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutSavedItemsInput
+}
+
+export type SavedItemsUncheckedCreateWithoutCollectionItemsInput = {
+  id?: string
+  url: string
+  title?: string | null
+  content?: string | null
+  summary?: string | null
+  tags?: Prisma.SavedItemsCreatetagsInput | string[]
+  author?: string | null
+  status?: $Enums.ItemStatus
+  publishedAt?: Date | string | null
+  ogImage?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  userId: string
+}
+
+export type SavedItemsCreateOrConnectWithoutCollectionItemsInput = {
+  where: Prisma.SavedItemsWhereUniqueInput
+  create: Prisma.XOR<Prisma.SavedItemsCreateWithoutCollectionItemsInput, Prisma.SavedItemsUncheckedCreateWithoutCollectionItemsInput>
+}
+
+export type SavedItemsUpsertWithoutCollectionItemsInput = {
+  update: Prisma.XOR<Prisma.SavedItemsUpdateWithoutCollectionItemsInput, Prisma.SavedItemsUncheckedUpdateWithoutCollectionItemsInput>
+  create: Prisma.XOR<Prisma.SavedItemsCreateWithoutCollectionItemsInput, Prisma.SavedItemsUncheckedCreateWithoutCollectionItemsInput>
+  where?: Prisma.SavedItemsWhereInput
+}
+
+export type SavedItemsUpdateToOneWithWhereWithoutCollectionItemsInput = {
+  where?: Prisma.SavedItemsWhereInput
+  data: Prisma.XOR<Prisma.SavedItemsUpdateWithoutCollectionItemsInput, Prisma.SavedItemsUncheckedUpdateWithoutCollectionItemsInput>
+}
+
+export type SavedItemsUpdateWithoutCollectionItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.SavedItemsUpdatetagsInput | string[]
+  author?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ogImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutSavedItemsNestedInput
+}
+
+export type SavedItemsUncheckedUpdateWithoutCollectionItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.SavedItemsUpdatetagsInput | string[]
+  author?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ogImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
 export type SavedItemsCreateManyUserInput = {
   id?: string
   url: string
@@ -653,6 +761,7 @@ export type SavedItemsUpdateWithoutUserInput = {
   ogImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  collectionItems?: Prisma.CollectionItemUpdateManyWithoutItemNestedInput
 }
 
 export type SavedItemsUncheckedUpdateWithoutUserInput = {
@@ -668,6 +777,7 @@ export type SavedItemsUncheckedUpdateWithoutUserInput = {
   ogImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  collectionItems?: Prisma.CollectionItemUncheckedUpdateManyWithoutItemNestedInput
 }
 
 export type SavedItemsUncheckedUpdateManyWithoutUserInput = {
@@ -686,6 +796,35 @@ export type SavedItemsUncheckedUpdateManyWithoutUserInput = {
 }
 
 
+/**
+ * Count Type SavedItemsCountOutputType
+ */
+
+export type SavedItemsCountOutputType = {
+  collectionItems: number
+}
+
+export type SavedItemsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  collectionItems?: boolean | SavedItemsCountOutputTypeCountCollectionItemsArgs
+}
+
+/**
+ * SavedItemsCountOutputType without action
+ */
+export type SavedItemsCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedItemsCountOutputType
+   */
+  select?: Prisma.SavedItemsCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SavedItemsCountOutputType without action
+ */
+export type SavedItemsCountOutputTypeCountCollectionItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CollectionItemWhereInput
+}
+
 
 export type SavedItemsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -702,6 +841,8 @@ export type SavedItemsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   updatedAt?: boolean
   userId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  collectionItems?: boolean | Prisma.SavedItems$collectionItemsArgs<ExtArgs>
+  _count?: boolean | Prisma.SavedItemsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["savedItems"]>
 
 export type SavedItemsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -757,6 +898,8 @@ export type SavedItemsSelectScalar = {
 export type SavedItemsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "url" | "title" | "content" | "summary" | "tags" | "author" | "status" | "publishedAt" | "ogImage" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["savedItems"]>
 export type SavedItemsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  collectionItems?: boolean | Prisma.SavedItems$collectionItemsArgs<ExtArgs>
+  _count?: boolean | Prisma.SavedItemsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SavedItemsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -769,6 +912,7 @@ export type $SavedItemsPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "SavedItems"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    collectionItems: Prisma.$CollectionItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1179,6 +1323,7 @@ readonly fields: SavedItemsFieldRefs;
 export interface Prisma__SavedItemsClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  collectionItems<T extends Prisma.SavedItems$collectionItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SavedItems$collectionItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollectionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1614,6 +1759,30 @@ export type SavedItemsDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many SavedItems to delete.
    */
   limit?: number
+}
+
+/**
+ * SavedItems.collectionItems
+ */
+export type SavedItems$collectionItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollectionItem
+   */
+  select?: Prisma.CollectionItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollectionItem
+   */
+  omit?: Prisma.CollectionItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionItemInclude<ExtArgs> | null
+  where?: Prisma.CollectionItemWhereInput
+  orderBy?: Prisma.CollectionItemOrderByWithRelationInput | Prisma.CollectionItemOrderByWithRelationInput[]
+  cursor?: Prisma.CollectionItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CollectionItemScalarFieldEnum | Prisma.CollectionItemScalarFieldEnum[]
 }
 
 /**

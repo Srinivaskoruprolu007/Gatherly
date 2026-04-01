@@ -389,6 +389,8 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   SavedItems: 'SavedItems',
+  Collection: 'Collection',
+  CollectionItem: 'CollectionItem',
   landing_page_content: 'landing_page_content'
 } as const
 
@@ -405,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "savedItems" | "landing_page_content"
+    modelProps: "user" | "session" | "account" | "verification" | "savedItems" | "collection" | "collectionItem" | "landing_page_content"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -779,6 +781,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Collection: {
+      payload: Prisma.$CollectionPayload<ExtArgs>
+      fields: Prisma.CollectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CollectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CollectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>
+        }
+        findFirst: {
+          args: Prisma.CollectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CollectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>
+        }
+        findMany: {
+          args: Prisma.CollectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>[]
+        }
+        create: {
+          args: Prisma.CollectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>
+        }
+        createMany: {
+          args: Prisma.CollectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CollectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>[]
+        }
+        delete: {
+          args: Prisma.CollectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>
+        }
+        update: {
+          args: Prisma.CollectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.CollectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CollectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CollectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.CollectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionPayload>
+        }
+        aggregate: {
+          args: Prisma.CollectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCollection>
+        }
+        groupBy: {
+          args: Prisma.CollectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CollectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CollectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CollectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    CollectionItem: {
+      payload: Prisma.$CollectionItemPayload<ExtArgs>
+      fields: Prisma.CollectionItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CollectionItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CollectionItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>
+        }
+        findFirst: {
+          args: Prisma.CollectionItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CollectionItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>
+        }
+        findMany: {
+          args: Prisma.CollectionItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>[]
+        }
+        create: {
+          args: Prisma.CollectionItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>
+        }
+        createMany: {
+          args: Prisma.CollectionItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CollectionItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>[]
+        }
+        delete: {
+          args: Prisma.CollectionItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>
+        }
+        update: {
+          args: Prisma.CollectionItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.CollectionItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CollectionItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CollectionItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.CollectionItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CollectionItemPayload>
+        }
+        aggregate: {
+          args: Prisma.CollectionItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCollectionItem>
+        }
+        groupBy: {
+          args: Prisma.CollectionItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CollectionItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CollectionItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CollectionItemCountAggregateOutputType> | number
+        }
+      }
+    }
     landing_page_content: {
       payload: Prisma.$landing_page_contentPayload<ExtArgs>
       fields: Prisma.landing_page_contentFieldRefs
@@ -967,6 +1117,28 @@ export const SavedItemsScalarFieldEnum = {
 } as const
 
 export type SavedItemsScalarFieldEnum = (typeof SavedItemsScalarFieldEnum)[keyof typeof SavedItemsScalarFieldEnum]
+
+
+export const CollectionScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type CollectionScalarFieldEnum = (typeof CollectionScalarFieldEnum)[keyof typeof CollectionScalarFieldEnum]
+
+
+export const CollectionItemScalarFieldEnum = {
+  id: 'id',
+  collectionId: 'collectionId',
+  itemId: 'itemId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CollectionItemScalarFieldEnum = (typeof CollectionItemScalarFieldEnum)[keyof typeof CollectionItemScalarFieldEnum]
 
 
 export const Landing_page_contentScalarFieldEnum = {
@@ -1192,6 +1364,8 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   savedItems?: Prisma.SavedItemsOmit
+  collection?: Prisma.CollectionOmit
+  collectionItem?: Prisma.CollectionItemOmit
   landing_page_content?: Prisma.landing_page_contentOmit
 }
 

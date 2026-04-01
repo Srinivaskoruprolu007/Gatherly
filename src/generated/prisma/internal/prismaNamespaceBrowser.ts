@@ -56,6 +56,8 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   SavedItems: 'SavedItems',
+  Collection: 'Collection',
+  CollectionItem: 'CollectionItem',
   landing_page_content: 'landing_page_content'
 } as const
 
@@ -150,6 +152,28 @@ export const SavedItemsScalarFieldEnum = {
 } as const
 
 export type SavedItemsScalarFieldEnum = (typeof SavedItemsScalarFieldEnum)[keyof typeof SavedItemsScalarFieldEnum]
+
+
+export const CollectionScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type CollectionScalarFieldEnum = (typeof CollectionScalarFieldEnum)[keyof typeof CollectionScalarFieldEnum]
+
+
+export const CollectionItemScalarFieldEnum = {
+  id: 'id',
+  collectionId: 'collectionId',
+  itemId: 'itemId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CollectionItemScalarFieldEnum = (typeof CollectionItemScalarFieldEnum)[keyof typeof CollectionItemScalarFieldEnum]
 
 
 export const Landing_page_contentScalarFieldEnum = {

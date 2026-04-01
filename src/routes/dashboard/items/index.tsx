@@ -13,7 +13,7 @@ import ItemsList from '#/components/web/items-list'
 import { fetchItemsfn } from '#/data/items-service'
 import { ItemStatus } from '#/generated/prisma/enums'
 import { itemSearchSchema } from '#/schemas/items'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { Suspense, useEffect, useState } from 'react'
 
@@ -69,13 +69,13 @@ const ItemsGridSkeleton = () => {
 
 function Index() {
   const { itemsPromise } = Route.useLoaderData()
-  const { q, status, page } = Route.useSearch()
-  const navigate = useNavigate({ from: Route.fullPath })
+  const { q = '', status = 'all', page = 1 } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const [searchInput, setSearchInput] = useState(q)
 
   useEffect(() => {
     setSearchInput(q)
-  }, [q])
+  }, [q, page])
 
   useEffect(() => {
     if (searchInput === q) return

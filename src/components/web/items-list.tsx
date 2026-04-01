@@ -1,4 +1,4 @@
-import type { fetchItemsfn } from '#/data/items-service'
+import type { fetchCollectionItemsfn, fetchItemsfn } from '#/data/items-service'
 import { copyToClipboard } from '#/lib/clipboard'
 import { Link } from '@tanstack/react-router'
 import {
@@ -8,7 +8,7 @@ import {
   Inbox,
   MoreHorizontal,
 } from 'lucide-react'
-import { use } from 'react'
+import { type ReactNode, use } from 'react'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Card, CardHeader, CardTitle } from '../ui/card'
@@ -71,9 +71,17 @@ function getPageItems(currentPage: number, totalPages: number) {
 const ItemsList = ({
   data,
   onPageChange,
+  emptyTitle,
+  emptyDescription,
+  emptyAction,
 }: {
-  data: ReturnType<typeof fetchItemsfn>
+  data:
+    | ReturnType<typeof fetchItemsfn>
+    | ReturnType<typeof fetchCollectionItemsfn>
   onPageChange: (page: number) => void
+  emptyTitle?: string
+  emptyDescription?: string
+  emptyAction?: ReactNode
 }) => {
   const { items, libraryTotalItems, pagination } = use(data)
   const startItem =
@@ -182,24 +190,27 @@ const ItemsList = ({
           <Empty>
             <EmptyHeader>
               <EmptyTitle>
-                {libraryTotalItems === 0
-                  ? 'No Save Imports yet'
-                  : 'No Items found'}
+                {emptyTitle ??
+                  (libraryTotalItems === 0
+                    ? 'No Saved Imports yet'
+                    : 'No Items found')}
               </EmptyTitle>
               <EmptyMedia variant="default">
                 <Inbox size={32} />
               </EmptyMedia>
               <EmptyDescription>
-                {libraryTotalItems === 0
-                  ? 'You have not imported any items yet.'
-                  : `No items found for applied filters.`}
+                {emptyDescription ??
+                  (libraryTotalItems === 0
+                    ? 'You have not imported any items yet.'
+                    : 'No items found for applied filters.')}
               </EmptyDescription>
             </EmptyHeader>
-            {libraryTotalItems === 0 && (
-              <EmptyContent>
-                <Link to="/dashboard/import">Import Items</Link>
-              </EmptyContent>
-            )}
+            {emptyAction ??
+              (libraryTotalItems === 0 ? (
+                <EmptyContent>
+                  <Link to="/dashboard/import">Import Items</Link>
+                </EmptyContent>
+              ) : null)}
           </Empty>
         </div>
       )}

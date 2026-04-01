@@ -344,6 +344,10 @@ export const bulkUrlScapFn = createServerFn({ method: 'POST' })
     }
   })
 
+const collectionItemSearchSchema = itemSearchSchema.extend({
+  collectionId: z.string(),
+})
+
 export const fetchItemsfn = createServerFn({ method: 'GET' })
   .middleware([authFnMiddleware])
   .inputValidator(itemSearchSchema)
@@ -427,6 +431,110 @@ export const fetchItemsfn = createServerFn({ method: 'GET' })
     }
   })
 
+export const fetchCollectionItemsfn = createServerFn({ method: 'GET' })
+  .middleware([authFnMiddleware])
+  .inputValidator(collectionItemSearchSchema)
+  .handler(async ({ data, context }) => {
+    const user = context.session.user
+    await purgeExpiredFailedItems(user.id)
+
+    const collection = await prisma.collection.findFirst({
+      where: {
+        id: data.collectionId,
+        userId: user.id,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    })
+
+    if (!collection) {
+      throw notFound()
+    }
+
+    const normalizedQuery = data.q.trim().toLowerCase()
+    const where = {
+      userId: user.id,
+      collectionItems: {
+        some: {
+          collectionId: data.collectionId,
+        },
+      },
+      ...(data.status !== 'all' ? { status: data.status } : {}),
+      ...(normalizedQuery
+        ? {
+            OR: [
+              {
+                title: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                summary: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                author: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                url: {
+                  contains: normalizedQuery,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                tags: {
+                  has: normalizedQuery,
+                },
+              },
+            ],
+          }
+        : {}),
+    }
+
+    const [libraryTotalItems, totalItems] = await Promise.all([
+      prisma.savedItems.count({
+        where: {
+          userId: user.id,
+        },
+      }),
+      prisma.savedItems.count({ where }),
+    ])
+
+    const totalPages =
+      totalItems === 0 ? 1 : Math.ceil(totalItems / ITEMS_PAGE_SIZE)
+    const currentPage = Math.min(data.page, totalPages)
+    const items = await prisma.savedItems.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip: (currentPage - 1) * ITEMS_PAGE_SIZE,
+      take: ITEMS_PAGE_SIZE,
+    })
+
+    return {
+      collection,
+      items,
+      libraryTotalItems,
+      pagination: {
+        currentPage,
+        pageSize: ITEMS_PAGE_SIZE,
+        totalItems,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPreviousPage: currentPage > 1,
+      },
+    }
+  })
+
 export const fetchItemByIdfn = createServerFn({ method: 'GET' })
   .middleware([authFnMiddleware])
   .inputValidator(z.object({ id: z.string() }))
@@ -439,11 +547,95 @@ export const fetchItemByIdfn = createServerFn({ method: 'GET' })
         userId: user.id,
         id: data.id,
       },
+      include: {
+        collectionItems: {
+          include: {
+            collection: true,
+          },
+        },
+      },
     })
 
     if (!item) throw notFound()
 
-    return item
+    return {
+      ...item,
+      collections: item.collectionItems.map(
+        (collectionItem) => collectionItem.collection,
+      ),
+    }
+  })
+
+export const fetchCollectionsfn = createServerFn({ method: 'GET' })
+  .middleware([authFnMiddleware])
+  .handler(async ({ context }) => {
+    const user = context.session.user
+    return prisma.collection.findMany({
+      where: { userId: user.id },
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            items: true,
+          },
+        },
+      },
+    })
+  })
+
+export const createCollectionFn = createServerFn({ method: 'POST' })
+  .middleware([authFnMiddleware])
+  .inputValidator(z.object({ name: z.string().min(1).max(50) }))
+  .handler(async ({ data, context }) => {
+    const user = context.session.user
+    return prisma.collection.create({
+      data: {
+        name: data.name.trim(),
+        userId: user.id,
+      },
+    })
+  })
+
+export const assignItemToCollectionFn = createServerFn({ method: 'POST' })
+  .middleware([authFnMiddleware])
+  .inputValidator(z.object({ itemId: z.string(), collectionId: z.string() }))
+  .handler(async ({ data, context }) => {
+    const user = context.session.user
+
+    const [item, collection] = await Promise.all([
+      prisma.savedItems.findUnique({
+        where: {
+          id: data.itemId,
+          userId: user.id,
+        },
+      }),
+      prisma.collection.findUnique({
+        where: {
+          id: data.collectionId,
+          userId: user.id,
+        },
+      }),
+    ])
+
+    if (!item || !collection) throw notFound()
+
+    await prisma.collectionItem.upsert({
+      where: {
+        collectionId_itemId: {
+          collectionId: data.collectionId,
+          itemId: data.itemId,
+        },
+      },
+      create: {
+        collectionId: data.collectionId,
+        itemId: data.itemId,
+      },
+      update: {},
+    })
+
+    return { itemId: data.itemId, collectionId: data.collectionId }
   })
 
 export const saveSummaryAndGenerateTagsFn = createServerFn({ method: 'POST' })

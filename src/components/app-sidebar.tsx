@@ -13,7 +13,7 @@ import {
 } from '#/components/ui/sidebar'
 import type { NavPrimaryProps, NavUserProps } from '#/lib/types'
 import { Link, linkOptions } from '@tanstack/react-router'
-import { BookOpen, Lightbulb, Rocket } from 'lucide-react'
+import { BookOpen, Bookmark, Lightbulb, Rocket } from 'lucide-react'
 import { NavUser } from './ui/nav-user'
 import NavPrimary from './web/nav-primary'
 
@@ -35,6 +35,12 @@ const projects: NavPrimaryProps['projects'] = linkOptions([
     to: '/dashboard/items',
     activeOptions: { exact: false },
     icon: BookOpen,
+  },
+  {
+    title: 'Collections',
+    to: '/dashboard/collections',
+    activeOptions: { exact: false },
+    icon: Bookmark,
   },
 ])
 

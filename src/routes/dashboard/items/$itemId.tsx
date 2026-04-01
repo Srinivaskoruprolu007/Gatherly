@@ -9,6 +9,27 @@ import {
   CollapsibleTrigger,
 } from '#/components/ui/collapsible'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '#/components/ui/dialog'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '#/components/ui/select'
+import {
+  assignItemToCollectionFn,
+  createCollectionFn,
+  fetchCollectionsfn,
   fetchItemByIdfn,
   saveSummaryAndGenerateTagsFn,
 } from '#/data/items-service'
@@ -23,7 +44,7 @@ import {
   ExternalLink,
   User,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 const MAX_SUMMARY_PROMPT_LENGTH = 50_000
@@ -48,8 +69,98 @@ export const Route = createFileRoute('/dashboard/items/$itemId')({
 function RouteComponent() {
   const [contentOpen, setContentOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [collections, setCollections] = useState<
+    { id: string; name: string }[]
+  >([])
+  const [selectedCollectionId, setSelectedCollectionId] = useState('')
+  const [newCollectionName, setNewCollectionName] = useState('')
+  const [isAssigningCollection, setIsAssigningCollection] = useState(false)
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false)
+  const [collectionDialogOpen, setCollectionDialogOpen] = useState(false)
   const data = Route.useLoaderData()
   const router = useRouter()
+
+  useEffect(() => {
+    let active = true
+
+    fetchCollectionsfn()
+      .then((result) => {
+        if (active) setCollections(result)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const assignedCollections = data.collections ?? []
+
+  const handleAssignCollection = async () => {
+    if (!selectedCollectionId) {
+      toast.error('Choose a collection first.')
+      return
+    }
+
+    setIsAssigningCollection(true)
+    const assignToast = toast.loading('Assigning item to collection...')
+
+    try {
+      await assignItemToCollectionFn({
+        data: {
+          itemId: data.id,
+          collectionId: selectedCollectionId,
+        },
+      })
+      toast.success('Item assigned to collection', { id: assignToast })
+      setSelectedCollectionId('')
+      await router.invalidate()
+    } catch (error) {
+      toast.error('Unable to assign item to collection', { id: assignToast })
+      console.error(error)
+    } finally {
+      setIsAssigningCollection(false)
+    }
+  }
+
+  const handleCreateCollection = async () => {
+    if (!newCollectionName.trim()) {
+      toast.error('Collection name is required.')
+      return
+    }
+
+    setIsCreatingCollection(true)
+    const createToast = toast.loading('Creating collection...')
+
+    try {
+      const collection = await createCollectionFn({
+        data: { name: newCollectionName.trim() },
+      })
+      await assignItemToCollectionFn({
+        data: {
+          itemId: data.id,
+          collectionId: collection.id,
+        },
+      })
+      toast.success('Collection created and item assigned', { id: createToast })
+      setNewCollectionName('')
+      setCollectionDialogOpen(false)
+      await router.invalidate()
+    } catch (error) {
+      toast.error('Unable to create collection', { id: createToast })
+      console.error(error)
+    } finally {
+      setIsCreatingCollection(false)
+    }
+  }
+
+  const collectionOptions = collections.map((collection) => (
+    <SelectItem key={collection.id} value={collection.id}>
+      {collection.name}
+    </SelectItem>
+  ))
 
   const { completion, isLoading, complete } = useCompletion({
     api: '/api/ai/summary',
@@ -126,7 +237,9 @@ function RouteComponent() {
       )}
 
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight">{data.title ?? 'Untitled'}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {data.title ?? 'Untitled'}
+        </h1>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           {data.author && (
@@ -163,6 +276,92 @@ function RouteComponent() {
             ))}
           </div>
         )}
+
+        <div className="space-y-4 rounded-lg border bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">Collections</p>
+              <p className="text-sm text-muted-foreground">
+                Organize this item into custom collections.
+              </p>
+            </div>
+            <Dialog
+              open={collectionDialogOpen}
+              onOpenChange={setCollectionDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button size="sm">Create & assign collection</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create a new collection</DialogTitle>
+                  <DialogDescription>
+                    Add a new custom collection and assign this item to it.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-3 py-4">
+                  <Label htmlFor="collection-name">Collection name</Label>
+                  <Input
+                    id="collection-name"
+                    value={newCollectionName}
+                    onChange={(event) =>
+                      setNewCollectionName(event.target.value)
+                    }
+                    placeholder="e.g. Research, Favorites"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    onClick={handleCreateCollection}
+                    disabled={isCreatingCollection}
+                  >
+                    {isCreatingCollection ? 'Saving…' : 'Create collection'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {assignedCollections.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {assignedCollections.map((collection) => (
+                <Badge key={collection.id} variant="outline">
+                  {collection.name}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              This item is not part of any collection yet.
+            </p>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-[1.5fr_auto] sm:items-end">
+            <div>
+              <Label htmlFor="collection-select">
+                Assign existing collection
+              </Label>
+              <Select
+                value={selectedCollectionId}
+                onValueChange={setSelectedCollectionId}
+              >
+                <SelectTrigger id="collection-select" className="w-full">
+                  <SelectValue placeholder="Choose a collection" />
+                </SelectTrigger>
+                <SelectContent>{collectionOptions}</SelectContent>
+              </Select>
+            </div>
+            <Button
+              size="sm"
+              disabled={!selectedCollectionId || isAssigningCollection}
+              onClick={async () => {
+                await handleAssignCollection()
+              }}
+            >
+              {isAssigningCollection ? 'Assigning…' : 'Assign'}
+            </Button>
+          </div>
+        </div>
 
         <AiSummaryCard
           completion={completion}

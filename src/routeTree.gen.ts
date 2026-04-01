@@ -17,9 +17,11 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardImportRouteImport } from './routes/dashboard/import'
 import { Route as DashboardDiscoverRouteImport } from './routes/dashboard/discover'
 import { Route as DashboardItemsIndexRouteImport } from './routes/dashboard/items/index'
+import { Route as DashboardCollectionsIndexRouteImport } from './routes/dashboard/collections/index'
 import { Route as AuthSignupIndexRouteImport } from './routes/auth/signup/index'
 import { Route as AuthLoginIndexRouteImport } from './routes/auth/login/index'
 import { Route as DashboardItemsItemIdRouteImport } from './routes/dashboard/items/$itemId'
+import { Route as DashboardCollectionsCollectionIdRouteImport } from './routes/dashboard/collections/$collectionId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiSummaryRouteImport } from './routes/api/ai/summary'
 
@@ -63,6 +65,12 @@ const DashboardItemsIndexRoute = DashboardItemsIndexRouteImport.update({
   path: '/items/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardCollectionsIndexRoute =
+  DashboardCollectionsIndexRouteImport.update({
+    id: '/collections/',
+    path: '/collections/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const AuthSignupIndexRoute = AuthSignupIndexRouteImport.update({
   id: '/signup/',
   path: '/signup/',
@@ -78,6 +86,12 @@ const DashboardItemsItemIdRoute = DashboardItemsItemIdRouteImport.update({
   path: '/items/$itemId',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardCollectionsCollectionIdRoute =
+  DashboardCollectionsCollectionIdRouteImport.update({
+    id: '/collections/$collectionId',
+    path: '/collections/$collectionId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -99,9 +113,11 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof DashboardIndexRoute
   '/api/ai/summary': typeof ApiAiSummaryRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/collections/$collectionId': typeof DashboardCollectionsCollectionIdRoute
   '/dashboard/items/$itemId': typeof DashboardItemsItemIdRoute
   '/auth/login/': typeof AuthLoginIndexRoute
   '/auth/signup/': typeof AuthSignupIndexRoute
+  '/dashboard/collections/': typeof DashboardCollectionsIndexRoute
   '/dashboard/items/': typeof DashboardItemsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -113,9 +129,11 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardIndexRoute
   '/api/ai/summary': typeof ApiAiSummaryRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/collections/$collectionId': typeof DashboardCollectionsCollectionIdRoute
   '/dashboard/items/$itemId': typeof DashboardItemsItemIdRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/auth/signup': typeof AuthSignupIndexRoute
+  '/dashboard/collections': typeof DashboardCollectionsIndexRoute
   '/dashboard/items': typeof DashboardItemsIndexRoute
 }
 export interface FileRoutesById {
@@ -129,9 +147,11 @@ export interface FileRoutesById {
   '/dashboard/': typeof DashboardIndexRoute
   '/api/ai/summary': typeof ApiAiSummaryRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/collections/$collectionId': typeof DashboardCollectionsCollectionIdRoute
   '/dashboard/items/$itemId': typeof DashboardItemsItemIdRoute
   '/auth/login/': typeof AuthLoginIndexRoute
   '/auth/signup/': typeof AuthSignupIndexRoute
+  '/dashboard/collections/': typeof DashboardCollectionsIndexRoute
   '/dashboard/items/': typeof DashboardItemsIndexRoute
 }
 export interface FileRouteTypes {
@@ -146,9 +166,11 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/api/ai/summary'
     | '/api/auth/$'
+    | '/dashboard/collections/$collectionId'
     | '/dashboard/items/$itemId'
     | '/auth/login/'
     | '/auth/signup/'
+    | '/dashboard/collections/'
     | '/dashboard/items/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -160,9 +182,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/api/ai/summary'
     | '/api/auth/$'
+    | '/dashboard/collections/$collectionId'
     | '/dashboard/items/$itemId'
     | '/auth/login'
     | '/auth/signup'
+    | '/dashboard/collections'
     | '/dashboard/items'
   id:
     | '__root__'
@@ -175,9 +199,11 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/api/ai/summary'
     | '/api/auth/$'
+    | '/dashboard/collections/$collectionId'
     | '/dashboard/items/$itemId'
     | '/auth/login/'
     | '/auth/signup/'
+    | '/dashboard/collections/'
     | '/dashboard/items/'
   fileRoutesById: FileRoutesById
 }
@@ -248,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardItemsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/collections/': {
+      id: '/dashboard/collections/'
+      path: '/collections'
+      fullPath: '/dashboard/collections/'
+      preLoaderRoute: typeof DashboardCollectionsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/auth/signup/': {
       id: '/auth/signup/'
       path: '/signup'
@@ -267,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/items/$itemId'
       fullPath: '/dashboard/items/$itemId'
       preLoaderRoute: typeof DashboardItemsItemIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/collections/$collectionId': {
+      id: '/dashboard/collections/$collectionId'
+      path: '/collections/$collectionId'
+      fullPath: '/dashboard/collections/$collectionId'
+      preLoaderRoute: typeof DashboardCollectionsCollectionIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/api/auth/$': {
@@ -304,7 +344,9 @@ interface DashboardRouteRouteChildren {
   DashboardDiscoverRoute: typeof DashboardDiscoverRoute
   DashboardImportRoute: typeof DashboardImportRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardCollectionsCollectionIdRoute: typeof DashboardCollectionsCollectionIdRoute
   DashboardItemsItemIdRoute: typeof DashboardItemsItemIdRoute
+  DashboardCollectionsIndexRoute: typeof DashboardCollectionsIndexRoute
   DashboardItemsIndexRoute: typeof DashboardItemsIndexRoute
 }
 
@@ -312,7 +354,9 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardDiscoverRoute: DashboardDiscoverRoute,
   DashboardImportRoute: DashboardImportRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardCollectionsCollectionIdRoute: DashboardCollectionsCollectionIdRoute,
   DashboardItemsItemIdRoute: DashboardItemsItemIdRoute,
+  DashboardCollectionsIndexRoute: DashboardCollectionsIndexRoute,
   DashboardItemsIndexRoute: DashboardItemsIndexRoute,
 }
 
