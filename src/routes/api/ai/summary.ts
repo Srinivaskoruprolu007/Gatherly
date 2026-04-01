@@ -1,4 +1,5 @@
 import { prisma } from '#/db'
+import { AppError, toJsonErrorResponse } from '#/lib/errors'
 import { openrouter } from '#/lib/open-router'
 import { retryAsync } from '#/lib/retry'
 import { createFileRoute } from '@tanstack/react-router'
@@ -60,18 +61,29 @@ export const Route = createFileRoute('/api/ai/summary')({
           return new Response('Item not found', { status: 404 })
         }
 
-        const result = await retryAsync(
-          async () =>
-            streamText({
-              model: openrouter.chat('stepfun/step-3.5-flash:free'),
-              system: SYSTEM_PROMPT,
-              prompt: `Title: ${item.title ?? 'Untitled'}\n\nContent:\n${normalizedPrompt}`,
-              temperature: 0.5,
-            }),
-          AI_SUMMARY_RETRY_OPTIONS,
-        )
+        try {
+          const result = await retryAsync(
+            async () =>
+              streamText({
+                model: openrouter.chat('stepfun/step-3.5-flash:free'),
+                system: SYSTEM_PROMPT,
+                prompt: `Title: ${item.title ?? 'Untitled'}\n\nContent:\n${normalizedPrompt}`,
+                temperature: 0.5,
+              }),
+            AI_SUMMARY_RETRY_OPTIONS,
+          )
 
-        return result.toTextStreamResponse()
+          return result.toTextStreamResponse()
+        } catch (error) {
+          return toJsonErrorResponse(
+            AppError.from(error, {
+              statusCode: 502,
+              code: 'AI_SUMMARY_FAILED',
+              publicMessage:
+                'Unable to generate a summary right now. Please try again later.',
+            }),
+          )
+        }
       },
     },
   },

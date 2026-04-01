@@ -278,7 +278,12 @@ export const scrapeUrlFn = createServerFn({ method: 'POST' })
       })
 
       console.error('Unable to scrape URL.', error)
-      throw new Error('Unable to scrape this URL')
+      throw AppError.from(error, {
+        statusCode: 500,
+        code: 'SCRAPE_FAILED',
+        publicMessage:
+          'Unable to scrape this URL right now. Please try again later.',
+      })
     }
   })
 
@@ -298,7 +303,12 @@ export const mapUrlFn = createServerFn({ method: 'POST' })
       return result.links
     } catch (error) {
       console.error('Unable to map URLs for bulk import.', error)
-      throw new Error('Unable to map URLs for this website')
+      throw AppError.from(error, {
+        statusCode: 502,
+        code: 'URL_MAP_FAILED',
+        publicMessage:
+          'Unable to map URLs for this website right now. Please try again later.',
+      })
     }
   })
 
@@ -711,14 +721,24 @@ export const searchWebFn = createServerFn({ method: 'POST' })
   .middleware([authFnMiddleware])
   .inputValidator(searchSchema)
   .handler(async ({ data }) => {
-    const result = await fireCrawl.search(data.query, {
-      limit: 10,
-      scrapeOptions: { formats: ['markdown'] },
-    })
+    try {
+      const result = await fireCrawl.search(data.query, {
+        limit: 10,
+        scrapeOptions: { formats: ['markdown'] },
+      })
 
-    return result.web?.map((item) => ({
-      url: (item as SearchResultWeb).url,
-      title: (item as SearchResultWeb).title,
-      description: (item as SearchResultWeb).description,
-    })) as SearchResultWeb[]
+      return result.web?.map((item) => ({
+        url: (item as SearchResultWeb).url,
+        title: (item as SearchResultWeb).title,
+        description: (item as SearchResultWeb).description,
+      })) as SearchResultWeb[]
+    } catch (error) {
+      console.error('Unable to search web.', error)
+      throw AppError.from(error, {
+        statusCode: 502,
+        code: 'WEB_SEARCH_FAILED',
+        publicMessage:
+          'Unable to search web results right now. Please try again later.',
+      })
+    }
   })

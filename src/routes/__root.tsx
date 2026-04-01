@@ -1,14 +1,15 @@
+import AppErrorBoundary from '#/components/ui/app-error-boundary'
 import { buttonVariants } from '#/components/ui/button'
 import { ThemeProvider } from '#/context/ThemeContext'
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from '#/lib/site'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import type { AnyRouteMatch } from '@tanstack/react-router'
 import {
   HeadContent,
   Link,
   Scripts,
   createRootRoute,
 } from '@tanstack/react-router'
-import type { AnyRouteMatch } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { Analytics } from '@vercel/analytics/react'
 import { Toaster } from 'sonner'
@@ -86,7 +87,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
         <ThemeProvider>
-          {children}
+          <AppErrorBoundary>{children}</AppErrorBoundary>
           <Toaster position="top-left" closeButton />
         </ThemeProvider>
         <Analytics />
