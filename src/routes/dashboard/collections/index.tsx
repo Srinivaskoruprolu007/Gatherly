@@ -118,7 +118,6 @@ function CollectionsList({
 
 function CollectionsIndex() {
   const { collectionsPromise } = Route.useLoaderData()
-  const collections = use(collectionsPromise)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [collectionName, setCollectionName] = useState('')
   const [isCreating, setIsCreating] = useState(false)
@@ -188,10 +187,19 @@ function CollectionsIndex() {
       </div>
 
       <Suspense fallback={<CollectionsSkeleton />}>
-        <CollectionsList collections={collections} />
+        <CollectionsListLoader collectionsPromise={collectionsPromise} />
       </Suspense>
     </div>
   )
+}
+
+function CollectionsListLoader({
+  collectionsPromise,
+}: {
+  collectionsPromise: ReturnType<typeof fetchCollectionsfn>
+}) {
+  const collections = use(collectionsPromise)
+  return <CollectionsList collections={collections} />
 }
 
 export default CollectionsIndex
