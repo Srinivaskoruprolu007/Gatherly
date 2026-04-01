@@ -1,10 +1,19 @@
 import { prisma } from '#/db'
 import { openrouter } from '#/lib/open-router'
+import { retryAsync } from '#/lib/retry'
 import { createFileRoute } from '@tanstack/react-router'
 import { streamText } from 'ai'
 import { z } from 'zod'
 
 const MAX_SUMMARY_PROMPT_LENGTH = 50_000
+
+const AI_SUMMARY_RETRY_OPTIONS = {
+  retries: 2,
+  minDelayMs: 250,
+  maxDelayMs: 3000,
+  factor: 2,
+  jitter: true,
+}
 
 const bodySchema = z.object({
   itemId: z.string().min(1),
@@ -51,12 +60,16 @@ export const Route = createFileRoute('/api/ai/summary')({
           return new Response('Item not found', { status: 404 })
         }
 
-        const result = streamText({
-          model: openrouter.chat('stepfun/step-3.5-flash:free'),
-          system: SYSTEM_PROMPT,
-          prompt: `Title: ${item.title ?? 'Untitled'}\n\nContent:\n${normalizedPrompt}`,
-          temperature: 0.5,
-        })
+        const result = await retryAsync(
+          async () =>
+            streamText({
+              model: openrouter.chat('stepfun/step-3.5-flash:free'),
+              system: SYSTEM_PROMPT,
+              prompt: `Title: ${item.title ?? 'Untitled'}\n\nContent:\n${normalizedPrompt}`,
+              temperature: 0.5,
+            }),
+          AI_SUMMARY_RETRY_OPTIONS,
+        )
 
         return result.toTextStreamResponse()
       },

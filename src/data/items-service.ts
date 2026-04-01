@@ -1,6 +1,7 @@
 import { prisma } from '#/db'
 import { fireCrawl } from '#/lib/fire-crawl'
 import { openrouter } from '#/lib/open-router'
+import { retryAsync } from '#/lib/retry'
 import { authFnMiddleware } from '#/middlewares/auth'
 import {
   bulkImportSchema,
@@ -18,6 +19,14 @@ import z from 'zod'
 const MAX_AI_CONTENT_LENGTH = 50_000
 const ITEMS_PAGE_SIZE = 8
 const FAILED_ITEM_RETENTION_MS = 60 * 60 * 1000
+
+const EXTERNAL_RETRY_OPTIONS = {
+  retries: 3,
+  minDelayMs: 250,
+  maxDelayMs: 5000,
+  factor: 2,
+  jitter: true,
+}
 
 const summaryAndTagsSchema = z.object({
   summary: z.string().min(1),
@@ -70,16 +79,20 @@ async function generateSummaryAndTags(title: string | null, content: string) {
   }
 
   try {
-    const { object } = await generateObject({
-      model: openrouter.chat('stepfun/step-3.5-flash:free'),
-      schema: summaryAndTagsSchema,
-      system: `You are a helpful assistant that turns web page content into reusable knowledge library metadata.
+    const { object } = await retryAsync(
+      () =>
+        generateObject({
+          model: openrouter.chat('stepfun/step-3.5-flash:free'),
+          schema: summaryAndTagsSchema,
+          system: `You are a helpful assistant that turns web page content into reusable knowledge library metadata.
 - Write a concise summary in 2-3 short paragraphs.
 - Be factual and do not invent details.
 - Keep the summary under 300 words.
 - Return 3-8 lowercase tags that are specific and useful for search.`,
-      prompt: `Title: ${title ?? 'Untitled'}\n\nContent:\n${normalizedContent}`,
-    })
+          prompt: `Title: ${title ?? 'Untitled'}\n\nContent:\n${normalizedContent}`,
+        }),
+      EXTERNAL_RETRY_OPTIONS,
+    )
 
     return {
       summary: object.summary.trim(),
@@ -99,15 +112,19 @@ async function generateTags(title: string | null, content: string) {
   }
 
   try {
-    const { object } = await generateObject({
-      model: openrouter.chat('stepfun/step-3.5-flash:free'),
-      schema: tagsSchema,
-      system: `You are a helpful assistant that extracts concise topic tags from web page content.
+    const { object } = await retryAsync(
+      () =>
+        generateObject({
+          model: openrouter.chat('stepfun/step-3.5-flash:free'),
+          schema: tagsSchema,
+          system: `You are a helpful assistant that extracts concise topic tags from web page content.
 - Return 3-8 lowercase tags.
 - Keep tags short, specific, and useful for filtering.
 - Avoid generic filler tags.`,
-      prompt: `Title: ${title ?? 'Untitled'}\n\nContent:\n${normalizedContent}`,
-    })
+          prompt: `Title: ${title ?? 'Untitled'}\n\nContent:\n${normalizedContent}`,
+        }),
+      EXTERNAL_RETRY_OPTIONS,
+    )
 
     return normalizeTags(object.tags)
   } catch (error) {
@@ -175,16 +192,20 @@ async function prepareItemForImport(options: {
 }
 
 async function completeImportedItem(itemId: string, url: string) {
-  const result = await fireCrawl.scrape(url, {
-    formats: [
-      'markdown',
-      {
-        type: 'json',
-        prompt: 'Please extract the following fields: author, publishedAt',
-      },
-    ],
-    onlyMainContent: true,
-  })
+  const result = await retryAsync(
+    () =>
+      fireCrawl.scrape(url, {
+        formats: [
+          'markdown',
+          {
+            type: 'json',
+            prompt: 'Please extract the following fields: author, publishedAt',
+          },
+        ],
+        onlyMainContent: true,
+      }),
+    EXTERNAL_RETRY_OPTIONS,
+  )
 
   const metadata = parseExtractedMetadata(result.json)
   const content = result.markdown || ''
@@ -266,10 +287,14 @@ export const mapUrlFn = createServerFn({ method: 'POST' })
   .inputValidator(bulkImportSchema)
   .handler(async ({ data }) => {
     try {
-      const result = await fireCrawl.map(data.url, {
-        limit: 25,
-        search: data.search,
-      })
+      const result = await retryAsync(
+        () =>
+          fireCrawl.map(data.url, {
+            limit: 25,
+            search: data.search,
+          }),
+        EXTERNAL_RETRY_OPTIONS,
+      )
       return result.links
     } catch (error) {
       console.error('Unable to map URLs for bulk import.', error)
