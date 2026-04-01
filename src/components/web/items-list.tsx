@@ -1,7 +1,13 @@
 import type { fetchItemsfn } from '#/data/items-service'
 import { copyToClipboard } from '#/lib/clipboard'
 import { Link } from '@tanstack/react-router'
-import { ChevronLeft, ChevronRight, Copy, Inbox, MoreHorizontal } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Inbox,
+  MoreHorizontal,
+} from 'lucide-react'
 import { use } from 'react'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
@@ -78,10 +84,7 @@ const ItemsList = ({
     pagination.currentPage * pagination.pageSize,
     pagination.totalItems,
   )
-  const pageItems = getPageItems(
-    pagination.currentPage,
-    pagination.totalPages,
-  )
+  const pageItems = getPageItems(pagination.currentPage, pagination.totalPages)
 
   return (
     <div className="space-y-6">
@@ -113,6 +116,8 @@ const ItemsList = ({
                       item.ogImage ||
                       `https://picsum.photos/seed/${item.id}/800/450`
                     }
+                    loading="lazy"
+                    decoding="async"
                     alt={item.title ?? 'article thumbnail'}
                     className="h-full w-full object-cover transition-all group-hover:scale-105"
                   />
@@ -142,7 +147,9 @@ const ItemsList = ({
                     {item.title}
                   </CardTitle>
                   {item.author && (
-                    <p className="text-sm text-muted-foreground">{item.author}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.author}
+                    </p>
                   )}
                   {previewText && (
                     <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
@@ -175,7 +182,9 @@ const ItemsList = ({
           <Empty>
             <EmptyHeader>
               <EmptyTitle>
-                {libraryTotalItems === 0 ? 'No Save Imports yet' : 'No Items found'}
+                {libraryTotalItems === 0
+                  ? 'No Save Imports yet'
+                  : 'No Items found'}
               </EmptyTitle>
               <EmptyMedia variant="default">
                 <Inbox size={32} />
@@ -223,7 +232,9 @@ const ItemsList = ({
                   <Button
                     key={pageItem}
                     variant={
-                      pageItem === pagination.currentPage ? 'default' : 'outline'
+                      pageItem === pagination.currentPage
+                        ? 'default'
+                        : 'outline'
                     }
                     size="sm"
                     onClick={(event) => {

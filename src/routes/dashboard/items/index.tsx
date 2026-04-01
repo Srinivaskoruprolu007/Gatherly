@@ -9,14 +9,13 @@ import {
 } from '#/components/ui/select'
 import { Skeleton } from '#/components/ui/skeleton'
 
+import ItemsList from '#/components/web/items-list'
 import { fetchItemsfn } from '#/data/items-service'
 import { ItemStatus } from '#/generated/prisma/enums'
 import { itemSearchSchema } from '#/schemas/items'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { zodValidator } from '@tanstack/zod-adapter'
-import { lazy, Suspense, useEffect, useState } from 'react'
-
-const ItemsList = lazy(() => import('#/components/web/items-list'))
+import { Suspense, useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/dashboard/items/')({
   component: Index,

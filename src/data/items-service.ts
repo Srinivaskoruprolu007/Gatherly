@@ -432,9 +432,9 @@ export const fetchItemByIdfn = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data, context }) => {
     const user = context.session.user
-    await purgeExpiredFailedItems(user.id)
+    purgeExpiredFailedItems(user.id).catch(console.error)
 
-    const item = await prisma.savedItems.findFirst({
+    const item = await prisma.savedItems.findUnique({
       where: {
         userId: user.id,
         id: data.id,
